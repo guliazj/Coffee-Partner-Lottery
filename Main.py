@@ -64,5 +64,3 @@ participants, formdata = load_participants(participants_csv)
 # Generate groups and messages
 groups = generate_groups(participants, group_size)
 generate_and_save_messages(groups, formdata, conversation_starters, messages_path)
-
-# Note: Direct execution of group generation and message saving in this script. Adjust paths as needed.
