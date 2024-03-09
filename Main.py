@@ -1,54 +1,68 @@
 import pandas as pd
 import csv
 import random
-import copy
 import os
 
-# Function to generate pairs from participants, avoiding duplicates and considering past pairings
-def generate_pairs(participants, history_file_path):
-    npairs = set()
-    nparticipants = copy.deepcopy(participants)
-    # Logic to generate pairs goes here, considering nparticipants and checking against history_file_path
-    # This is a placeholder logic. Actual implementation depends on how pairs are chosen and history is used.
-    return npairs
+# Define paths and headers for files
+participants_csv = "participants.csv"
+header_name = "Your name:"
+header_email = "Your e-mail:"
+conversation_starters_csv = "conversationstarters.csv"
+messages_path = "Coffee Partner Lottery messages"
+group_size = 2
 
-# Function to generate output string for today's coffee partners
-def generate_output_string(pairs, participants):
-    output_string = "------------------------\n"
-    output_string += "Today's coffee partners:\n"
-    output_string += "------------------------\n"
-    for pair in pairs:
-        pair = list(pair)
-        output_string += "* "
-        for i in range(len(pair)):
-            name_email_pair = f"{participants[participants['email'] == pair[i]].iloc[0]['name']} ({pair[i]})"
-            output_string += name_email_pair + ", " if i < len(pair)-1 else name_email_pair + "\n"
-    return output_string
+# Function to load conversation starters from a CSV file
+def load_conversation_starters(csv_file):
+    with open(csv_file, mode='r', encoding='utf-8') as file:
+        return [row["conversation starter:"] for row in csv.DictReader(file)]
 
-# Function to save the output string to a text file
-def save_output_text(output_string, file_path):
-    with open(file_path, "w") as file:
-        file.write(output_string)
+# Function to load participants from a CSV file
+def load_participants(filename):
+    formdata = pd.read_csv(filename, sep=',')
+    return list(set(formdata[header_email])), formdata
 
-# Function to save new pairs into a CSV file
-def save_pairs_csv(pairs, participants, file_path):
-    with open(file_path, "w") as file:
-        writer = csv.writer(file)
-        # Define header based on expected columns
-        writer.writerow(["name", "email"])
-        for pair in pairs:
-            # Write each pair to the file
-            writer.writerow([participants[participants['email'] == email].iloc[0]['name'], email] for email in pair)
+# Function to generate groups of participants
+def generate_groups(participants, size):
+    random.shuffle(participants)
+    # Initially form groups based on the desired size
+    groups = [participants[i:i + size] for i in range(0, len(participants), size)]
+    
+    # If the last group has only one participant, redistribute that participant
+    if len(groups) > 1 and len(groups[-1]) == 1:
+        # Take the last participant and try to fit them into an existing group without exceeding size + 1
+        lone_participant = groups.pop()
+        for group in groups[:-1]:  # Avoid modifying the second to last group initially
+            if len(group) < size:
+                group.extend(lone_participant)
+                break
+        else:
+            # If all other groups are at max size, add to the second to last group, slightly exceeding the desired size
+            groups[-1].extend(lone_participant)
+    return groups
 
-# Main function to encapsulate the process
-def main(participants_file_path, history_file_path, output_text_path, pairs_csv_path):
-    participants = pd.read_csv(participants_file_path, sep=',')
-    pairs = generate_pairs(participants, history_file_path)
-    output_string = generate_output_string(pairs, participants)
-    print(output_string)
-    save_output_text(output_string, output_text_path)
-    save_pairs_csv(pairs, participants, pairs_csv_path)
-    print("Job done.")
+# Function to generate and save messages for each group, including a conversation starter
 
-if __name__ == '__main__':
-    main('participants.csv', 'history.csv', 'newPairs.txt', 'newPairs.csv')
+def generate_and_save_messages(groups, formdata, starters, output_path):
+    starter = random.choice(starters)
+    try:
+        if not os.path.exists(output_path):
+            os.makedirs(output_path)
+        for i, group in enumerate(groups, 1):
+            names = ' & '.join([formdata[formdata[header_email] == email].iloc[0][header_name] for email in group])
+            message = f"Hello {names},\n\nYou've been matched for this round of the Coffee Partner Lottery.\n\n" f"Conversation Starter: {starter}\n\nEnjoy your conversation!"
+            file_path = os.path.join(output_path, f"group_{i}.txt")
+            with open(file_path, "w", encoding='utf-8') as file:
+                file.write(message)
+            print(f"Message saved to: {file_path}")
+    except Exception as e:
+        print(f"Error saving messages: {e}")
+
+# Load conversation starters and participants
+conversation_starters = load_conversation_starters(conversation_starters_csv)
+participants, formdata = load_participants(participants_csv)
+
+# Generate groups and messages
+groups = generate_groups(participants, group_size)
+generate_and_save_messages(groups, formdata, conversation_starters, messages_path)
+
+# Note: Direct execution of group generation and message saving in this script. Adjust paths as needed.
