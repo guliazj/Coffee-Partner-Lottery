@@ -23,24 +23,25 @@ print(df)
 print(len(df))
 lendf = len(df)
 
-def inputGroupSize(lendf):
-    groupSize = 0
-    groupSize = input('how much do you want your groupsize to be(between 2 and 8)')
-    print(groupSize)
-    try:
-        groupSize= int(groupSize)
-    except ValueError:
-        print('input was not a number')
-        inputGroupSize(lendf)
-    if groupSize > 8:
-        print('Choose a smaller groupsize')
-        inputGroupSize(lendf)
-    if groupSize > lendf:
-        print('There are not enough participants, choose a groupsize smaller')
-        inputGroupSize(lendf)
-    
-    return groupSize
 #loading csv data into dataframe
+
+def input_group_size(len_df):
+    while True:  # Loop until valid input is received
+        try:
+            group_size = int(input('Enter your desired group size (between 2 and 8): '))
+            print(group_size)  # Echo the input back to the user
+            
+            if group_size < 2:
+                print('Group size too small. Please choose a number between 2 and 8.')
+            elif group_size > 8:
+                print('Group size too large. Please choose a number between 2 and 8.')
+            elif group_size > len_df:
+                print(f'There are not enough participants. Choose a group size smaller than or equal to {len_df}.')
+            else:
+                return group_size  # Valid input; return the group size
+            
+        except ValueError:  # Catch non-integer inputs
+            print('Input was not a number. Please enter a valid integer between 2 and 8.')
 
 inputGroupSize(lendf)
 

@@ -9,7 +9,10 @@ header_name = "Your name:"
 header_email = "Your e-mail:"
 conversation_starters_csv = "conversationstarters.csv"
 messages_path = "Coffee Partner Lottery messages"
-group_size = 2
+
+
+
+
 
 # Function to load conversation starters from a CSV file
 def load_conversation_starters(csv_file):
@@ -21,18 +24,44 @@ def load_participants(filename):
     formdata = pd.read_csv(filename, sep=',')
     return list(set(formdata[header_email])), formdata
 
+
+def input_group_size(len_df):
+    #loop until avalid input is received
+    while True:  
+        try:
+            group_size = int(input('Enter your desired group size (between 2 and 8): '))
+            #print to the user
+            print(group_size)  
+            
+            if group_size < 2:
+                print('Group size too small. Please choose a number between 2 and 8.')
+            elif group_size > 8:
+                print('Group size too large. Please choose a number between 2 and 8.')
+            elif group_size > len_df:
+                print(f'There are not enough participants. Choose a group size smaller than or equal to {len_df}.')
+            else:
+                return group_size  
+            # Valid input; return the group size
+
+          # Catch non-integer inputs  
+        except ValueError:  
+            print('Input was not a number. Please enter a valid integer between 2 and 8.')
+
+
 # Function to generate groups of participants
-def generate_groups(participants, size):
+def generate_groups(participants):
+    len_df = len(participants)
+    group_size = input_group_size(len_df)
     random.shuffle(participants)
     # Initially form groups based on the desired size
-    groups = [participants[i:i + size] for i in range(0, len(participants), size)]
+    groups = [participants[i:i + group_size] for i in range(0, len(participants), group_size)]
     
     # If the last group has only one participant, redistribute that participant
     if len(groups) > 1 and len(groups[-1]) == 1:
         # Take the last participant and try to fit them into an existing group without exceeding size + 1
         lone_participant = groups.pop()
         for group in groups[:-1]:  # Avoid modifying the second to last group initially
-            if len(group) < size:
+            if len(group) < group_size:
                 group.extend(lone_participant)
                 break
         else:
@@ -62,5 +91,6 @@ conversation_starters = load_conversation_starters(conversation_starters_csv)
 participants, formdata = load_participants(participants_csv)
 
 # Generate groups and messages
-groups = generate_groups(participants, group_size)
+
+groups = generate_groups(participants)
 generate_and_save_messages(groups, formdata, conversation_starters, messages_path)
