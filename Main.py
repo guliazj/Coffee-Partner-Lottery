@@ -75,7 +75,7 @@ def generate_and_save_messages(groups, formdata, starters, output_path):
             os.makedirs(output_path)
         for i, group in enumerate(groups, 1):
             names = ' & '.join([formdata[formdata[header_email] == email].iloc[0][header_name] for email in group])
-            message = f"Hello {names},\n\nYou've been matched for this round of the Coffee Partner Lottery.\n\n" f"Conversation Starter: {starter}\n\nEnjoy your conversation!"
+            message = f"Hello {names},\n\nYou've been matched for this round of the Coffee Partner Lottery.\n\n" f"Conversation Starter: {starter}\n\nEnjoy your conversation!\nPlease send an email and provide feedback for your group.\nYour feedback can be about your group members and the overall experience."
             file_path = os.path.join(output_path, f"group_{i}.txt")
             with open(file_path, "w", encoding='utf-8') as file:
                 file.write(message)
@@ -87,7 +87,7 @@ def generate_and_save_messages(groups, formdata, starters, output_path):
 def collect_feedback(group, formdata):
     feedback_data = []
     for email in group:
-        feedback = input(f"Please provide feedback for your coffee meeting group with {formdata[formdata[header_email] == email].iloc[0][header_name]}: ")
+        feedback = input(f"Please provide feedback for the coffee meeting group with {formdata[formdata[header_email] == email].iloc[0][header_name]}: ")
         feedback_data.append({"Email": email, "Feedback": feedback})
     return feedback_data
 
@@ -111,7 +111,17 @@ participants, formdata = load_participants(participants_csv)
 groups = generate_groups(participants)
 generate_and_save_messages(groups, formdata, conversation_starters, messages_path)
 
-# Collect and save feedback for each group
-for group in groups:
-    feedback_data = collect_feedback(group, formdata)
-    save_feedback(feedback_data, feedback_csv)
+# Check if all meetings are done
+all_meetings_done = input("Are all meetings done? (yes/no): ").lower()
+
+while all_meetings_done != "yes":
+    all_meetings_done = input("Meetings are not done yet. Are all meetings done now? (yes/no): ").lower()
+
+feedback_received = input("Have you received any emails with feedback on the groups? (yes/no): ").lower()
+if feedback_received == "yes":
+    # Collect and save feedback for each group
+    for group in groups:
+        feedback_data = collect_feedback(group, formdata)
+        save_feedback(feedback_data, feedback_csv)
+else:
+    print("No feedback received. Exiting program.")
