@@ -9,9 +9,7 @@ header_name = "Your name:"
 header_email = "Your e-mail:"
 conversation_starters_csv = "conversationstarters.csv"
 messages_path = "Coffee Partner Lottery messages"
-
-
-
+feedback_csv = "feedback.csv"  # Path to store feedback data
 
 
 # Function to load conversation starters from a CSV file
@@ -24,9 +22,9 @@ def load_participants(filename):
     formdata = pd.read_csv(filename, sep=',')
     return list(set(formdata[header_email])), formdata
 
-
+# Function to input group size
 def input_group_size(len_df):
-    #loop until avalid input is received
+    #loop until a valid input is received
     while True:  
         try:
             group_size = int(input('Enter your desired group size (between 2 and 8): '))
@@ -70,7 +68,6 @@ def generate_groups(participants):
     return groups
 
 # Function to generate and save messages for each group, including a conversation starter
-
 def generate_and_save_messages(groups, formdata, starters, output_path):
     starter = random.choice(starters)
     try:
@@ -85,12 +82,36 @@ def generate_and_save_messages(groups, formdata, starters, output_path):
             print(f"Message saved to: {file_path}")
     except Exception as e:
         print(f"Error saving messages: {e}")
+        
+# Function to collect feedback for a specific group
+def collect_feedback(group, formdata):
+    feedback_data = []
+    for email in group:
+        feedback = input(f"Please provide feedback for your coffee meeting group with {formdata[formdata[header_email] == email].iloc[0][header_name]}: ")
+        feedback_data.append({"Email": email, "Feedback": feedback})
+    return feedback_data
+
+# Function to save feedback data to a CSV file
+def save_feedback(feedback_data, output_path):
+    try:
+        with open(output_path, "w", newline='', encoding='utf-8') as file:
+            writer = csv.DictWriter(file, fieldnames=["Email", "Feedback"])
+            writer.writeheader()
+            writer.writerows(feedback_data)
+        print(f"Feedback data saved to: {output_path}")
+    except Exception as e:
+        print(f"Error saving feedback data: {e}")
+
 
 # Load conversation starters and participants
 conversation_starters = load_conversation_starters(conversation_starters_csv)
 participants, formdata = load_participants(participants_csv)
 
 # Generate groups and messages
-
 groups = generate_groups(participants)
 generate_and_save_messages(groups, formdata, conversation_starters, messages_path)
+
+# Collect and save feedback for each group
+for group in groups:
+    feedback_data = collect_feedback(group, formdata)
+    save_feedback(feedback_data, feedback_csv)
