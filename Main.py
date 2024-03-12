@@ -101,7 +101,32 @@ def save_feedback(feedback_data, output_path):
         print(f"Feedback data saved to: {output_path}")
     except Exception as e:
         print(f"Error saving feedback data: {e}")
-
+        
+# Function to ask for feedback and save it
+def ask_and_save_feedback():
+    # Ask if the user wants to provide feedback
+    leave_feedback = input("Do you want to leave feedback for the coffee meetings? (yes/no): ").lower()
+    if leave_feedback == "yes":
+        # Check if all meetings are done
+        all_meetings_done = input("Are all meetings done? (yes/no): ").lower()
+        while all_meetings_done != "yes":
+            wait_for_meetings = input("Meetings are not done yet. Do you want to wait? (yes/no): ").lower()
+            if wait_for_meetings == "no":
+                print("Exiting program.")
+                return
+            all_meetings_done = input("Are all meetings done now? (yes/no): ").lower()
+        
+        # Check if feedback has been received
+        feedback_received = input("Have you received any emails with feedback on the groups? (yes/no): ").lower()
+        if feedback_received == "yes":
+            # Collect and save feedback for each group
+            for group in groups:
+                feedback_data = collect_feedback(group, formdata)
+                save_feedback(feedback_data, feedback_csv)
+        else:
+            print("No feedback received. Exiting program.")
+    else:
+        print("No feedback provided. Exiting program.")
 
 # Load conversation starters and participants
 conversation_starters = load_conversation_starters(conversation_starters_csv)
@@ -111,17 +136,5 @@ participants, formdata = load_participants(participants_csv)
 groups = generate_groups(participants)
 generate_and_save_messages(groups, formdata, conversation_starters, messages_path)
 
-# Check if all meetings are done
-all_meetings_done = input("Are all meetings done? (yes/no): ").lower()
-
-while all_meetings_done != "yes":
-    all_meetings_done = input("Meetings are not done yet. Are all meetings done now? (yes/no): ").lower()
-
-feedback_received = input("Have you received any emails with feedback on the groups? (yes/no): ").lower()
-if feedback_received == "yes":
-    # Collect and save feedback for each group
-    for group in groups:
-        feedback_data = collect_feedback(group, formdata)
-        save_feedback(feedback_data, feedback_csv)
-else:
-    print("No feedback received. Exiting program.")
+# Call the function to ask for feedback and save it
+ask_and_save_feedback()
