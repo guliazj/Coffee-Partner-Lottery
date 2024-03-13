@@ -80,9 +80,14 @@ def generate_and_save_messages(groups, formdata, starters, output_path):
             with open(file_path, "w", encoding='utf-8') as file:
                 file.write(message)
             print(f"Message saved to: {file_path}")
+        print(f"\nToday's Coffee Groups:")
+        for i, group in enumerate(groups, 1):
+            names = ' & '.join([formdata[formdata[header_email] == email].iloc[0][header_name] for email in group])
+            print(f"Group{i}: {names}")
     except Exception as e:
         print(f"Error saving messages: {e}")
-        
+
+
 # Function to collect feedback for a specific group
 def collect_feedback(group, formdata):
     feedback_data = []
