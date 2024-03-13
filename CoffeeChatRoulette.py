@@ -8,7 +8,7 @@ participants_csv = "participants.csv"
 header_name = "Your name:"
 header_email = "Your e-mail:"
 conversation_starters_csv = "conversationstarters.csv"
-messages_path = "Coffee Partner Lottery messages"
+messages_path = "Coffee Chat Roulette messages"
 feedback_csv = "feedback.csv"  # Path to store feedback data
 
 
@@ -75,7 +75,7 @@ def generate_and_save_messages(groups, formdata, starters, output_path):
             os.makedirs(output_path)
         for i, group in enumerate(groups, 1):
             names = ' & '.join([formdata[formdata[header_email] == email].iloc[0][header_name] for email in group])
-            message = f"Hello {names},\n\nYou've been matched for this round of the Coffee Partner Lottery.\n\n" f"Conversation Starter: {starter}\n\nEnjoy your conversation!\nPlease send an email and provide feedback for your group.\nYour feedback can be about your group members and the overall experience."
+            message = f"Hello {names},\n\nYou've been matched for this round of the Coffee Chat Roulette.\n\n" f"Conversation Starter: {starter}\n\nEnjoy your conversation!\nPlease send an email and provide feedback for your group.\nYour feedback can be about your group members and the overall experience."
             file_path = os.path.join(output_path, f"group_{i}.txt")
             with open(file_path, "w", encoding='utf-8') as file:
                 file.write(message)
