@@ -79,7 +79,7 @@ def generate_and_save_messages(groups, formdata, starters, output_path):
             names = ' & '.join([formdata[formdata[header_email] == email].iloc[0][header_name] for email in group])
             message = f"Hello {names},\n\nYou've been matched for this round of the Coffee Chat Roulette.\n\n" f"Conversation Starter: {starter}\n\nEnjoy your conversation!\nPlease send an email and provide feedback for your group.\nYour feedback can be about your group members and the overall experience."
             file_path = os.path.join(output_path, f"group_{i}.txt")
-            print(f"Group{i}: {names}")
+            print(f"Group {i}: {names}")
             with open(file_path, "w", encoding='utf-8') as file:
                 file.write(message)
             print(f"Message saved to: {file_path}\n")
